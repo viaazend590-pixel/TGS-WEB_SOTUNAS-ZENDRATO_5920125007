@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joy Salon - Reservasi</title>
+    <!-- Menggunakan Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Menggunakan Google Fonts (Poppins) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-bg: #2c1e3f; /* Warna ungu gelap sidebar */
+            --primary-hover: #3d2a56;
+            --bg-color: #f4f6f9;
+            --white: #ffffff;
+            --text-main: #333333;
+            --text-muted: #888888;
+            --border-color: #e0e0e0;
+            
+            /* Warna Status */
+            --status-menunggu-bg: #fff3cd;
+            --status-menunggu-text: #856404;
+            --status-dikonfirmasi-bg: #d1ecf1;
+            --status-dikonfirmasi-text: #0c5460;
+            --status-selesai-bg: #d4edda;
+            --status-selesai-text: #155724;
+            --status-ditolak-bg: #f8d7da;
+            --status-ditolak-text: #721c24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            background-color: var(--bg-color);
+            min-height: 100vh;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 250px;
+            background-color: var(--primary-bg);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            color: #b0a4c4;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 0;
+            flex-grow: 1;
+        }
+
+        .sidebar-menu li {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+
+        .sidebar-menu li i {
+            width: 25px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .sidebar-menu li:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .sidebar-menu li.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--white);
+            padding-left: 16px;
+            font-weight: 500;
+        }
+
+        .sidebar-menu li.logout {
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            margin-left: 250px;
+            flex-grow: 1;
+            padding: 30px;
+            width: calc(100% - 250px);
+        }
+
+        /* Header Halaman */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .page-title h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 5px;
+        }
+
+        .page-title p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .btn-add {
+            background-color: var(--primary-bg);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+
+        .btn-add:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Filter & Search Section */
+        .filter-section {
+            background-color: var(--white);
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .search-box {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-bg);
+        }
+
+        .filter-inputs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-inputs input, 
+        .filter-inputs select {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            color: var(--text-muted);
+        }
+
+        /* Tabel Data */
+        .table-container {
+            background-color: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            background-color: #f9fafb;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 20px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        td {
+            padding: 15px 20px;
+            color: var(--text-main);
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: #fafafa;
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            display: inline-block;
+            text-transform: capitalize;
+        }
+
+        .badge.menunggu {
+            background-color: var(--status-menunggu-bg);
+            color: var(--status-menunggu-text);
+        }
+
+        .badge.dikonfirmasi {
+            background-color: var(--status-dikonfirmasi-bg);
+            color: var(--status-dikonfirmasi-text);
+        }
+
+        .badge.selesai {
+            background-color: var(--status-selesai-bg);
+            color: var(--status-selesai-text);
+        }
+
+        .badge.ditolak {
+            background-color: var(--status-ditolak-bg);
+            color: var(--status-ditolak-text);
+        }
+
+        /* Aksi / Action Links */
+        .action-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .action-links a {
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .action-links a:hover {
+            text-decoration: underline;
+        }
+
+        .action-links a.primary {
+            color: #007bff;
+        }
+
+        .action-links a.danger {
+            color: #dc3545;
+        }
+
+        .action-links a.secondary {
+            color: var(--text-muted);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Joy Salon</h2>
+            <p>Admin</p>
+        </div>
+        <ul class="sidebar-menu">
+            <li><i class="fas fa-home"></i> Beranda</li>
+            <li class="active"><i class="fas fa-calendar-check"></i> Reservasi</li>
+            <li><i class="fas fa-exchange-alt"></i> Transaksi</li>
+            <li><i class="fas fa-spa"></i> Treatment</li>
+            <li><i class="fas fa-users"></i> Pelanggan</li>
+            <li><i class="fas fa-user-tie"></i> Karyawan</li>
+            <li><i class="fas fa-user-circle"></i> Pengguna</li>
+            <li><i class="fas fa-chart-bar"></i> Laporan</li>
+            <li class="logout"><i class="fas fa-sign-out-alt"></i> Keluar</li>
+        </ul>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        
+        <!-- HEADER -->
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Reservasi</h1>
+                <p>Jumat, 18 September 2026 · 14 jadwal</p>
+            </div>
+            <button class="btn-add">
+                <i class="fas fa-plus"></i> Tambah reservasi
+            </button>
+        </div>
+
+        <!-- FILTER & SEARCH -->
+        <div class="filter-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Cari nama pelanggan atau nomor HP...">
+            </div>
+            <div class="filter-inputs">
+                <input type="date" id="dateFilter" value="2026-09-18">
+                <select id="statusFilter">
+                    <option value="">Semua status</option>
+                    <option value="Menunggu">Menunggu</option>
+                    <option value="Dikonfirmasi">Dikonfirmasi</option>
+                    <option value="Selesai">Selesai</option>
+                    <option value="Ditolak">Ditolak</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- TABEL DATA -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kode</th>
+                        <th>Pelanggan</th>
+                        <th>Treatment</th>
+                        <th>Jam</th>
+                        <th>Karyawan</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="reservationTableBody">
+                    <!-- Data akan di-render oleh JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // Data dummy sesuai dengan gambar
+        const reservations = [
+            { kode: "RS-1043", pelanggan: "Bingira", treatment: "Smoothing", jam: "15.00", karyawan: "Rina", status: "Menunggu" },
+            { kode: "RS-1042", pelanggan: "mahesa", treatment: "Potong pria", jam: "13.00", karyawan: "Bagas", status: "Dikonfirmasi" },
+            { kode: "RS-1041", pelanggan: "Jesika", treatment: "Creambath + potong", jam: "11.30", karyawan: "Tika", status: "Selesai" },
+            { kode: "RS-1040", pelanggan: "Naila", treatment: "Hair spa", jam: "10.00", karyawan: "Rina", status: "Selesai" },
+            { kode: "RS-1039", pelanggan: "Putri", treatment: "Facial dasar", jam: "16.30", karyawan: "—", status: "Ditolak" }
+        ];
+
+        // Fungsi untuk merender tabel
+        function renderTable(data) {
+            const tbody = document.getElementById('reservationTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                
+                // Logika Warna Badge
+                let badgeClass = '';
+                if (item.status === 'Menunggu') badgeClass = 'menunggu';
+                else if (item.status === 'Dikonfirmasi') badgeClass = 'dikonfirmasi';
+                else if (item.status === 'Selesai') badgeClass = 'selesai';
+                else if (item.status === 'Ditolak') badgeClass = 'ditolak';
+
+                // Logika Tombol Aksi berdasarkan Status
+                let actionHTML = '';
+                if (item.status === 'Menunggu') {
+                    actionHTML = `
+                        <div class="action-links">
+                            <a class="primary" onclick="alert('Konfirmasi reservasi ${item.kode}')">Konfirmasi</a>
+                            <a class="secondary" onclick="alert('Tolak reservasi ${item.kode}')">Tolak</a>
+                        </div>
+                    `;
+                } else if (item.status === 'Dikonfirmasi') {
+                    actionHTML = `
+                        <div class="action-links">
+                            <a class="primary" onclick="alert('Ubah reservasi ${item.kode}')">Ubah</a>
+                            <a class="danger" onclick="alert('Selesaikan reservasi ${item.kode}')">Selesai</a>
+                        </div>
+                    `;
+                } else if (item.status === 'Selesai' || item.status === 'Ditolak') {
+                    actionHTML = `
+                        <div class="action-links">
+                            <a class="secondary" onclick="alert('Lihat detail reservasi ${item.kode}')">Lihat</a>
+                        </div>
+                    `;
+                }
+
+                tr.innerHTML = `
+                    <td>${item.kode}</td>
+                    <td>${item.pelanggan}</td>
+                    <td>${item.treatment}</td>
+                    <td>${item.jam}</td>
+                    <td>${item.karyawan}</td>
+                    <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                    <td>${actionHTML}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Fungsi untuk memfilter data
+        function filterData() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusTerm = document.getElementById('statusFilter').value;
+
+            const filtered = reservations.filter(item => {
+                const matchSearch = item.pelanggan.toLowerCase().includes(searchTerm) || item.kode.toLowerCase().includes(searchTerm);
+                const matchStatus = statusTerm === '' || item.status === statusTerm;
+                return matchSearch && matchStatus;
+            });
+
+            renderTable(filtered);
+        }
+
+        // Event Listeners untuk Search dan Filter
+        document.getElementById('searchInput').addEventListener('input', filterData);
+        document.getElementById('statusFilter').addEventListener('change', filterData);
+
+        // Render awal saat halaman dimuat
+        renderTable(reservations);
+    </script>
+</body>
+</html>
